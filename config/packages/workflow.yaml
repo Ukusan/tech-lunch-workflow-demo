@@ -1,0 +1,42 @@
+framework:
+    workflows:
+        pull_request:
+            type: 'state_machine'
+            marking_store:
+                 type: 'method'
+                 property: 'currentPlace'
+            supports:
+                - App\Entity\Ticket
+            initial_marking: describe
+            places:
+                - !php/const App\Constant\PRPlace::DESCRIBE
+                - !php/const App\Constant\PRPlace::CODING
+                - !php/const App\Constant\PRPlace::REVIEW
+                - !php/const App\Constant\PRPlace::TEST
+                - !php/const App\Constant\PRPlace::MERGED
+                - !php/const App\Constant\PRPlace::CLOSED
+            transitions:
+                submit:
+                    from: !php/const App\Constant\PRPlace::DESCRIBE
+                    to: !php/const App\Constant\PRPlace::CODING
+                request_detail:
+                    from: !php/const App\Constant\PRPlace::CODING
+                    to: !php/const App\Constant\PRPlace::DESCRIBE
+                wait_for_review:
+                    from: !php/const App\Constant\PRPlace::CODING
+                    to: !php/const App\Constant\PRPlace::REVIEW
+                request_change:
+                    from: [!php/const App\Constant\PRPlace::TEST,!php/const App\Constant\PRPlace::REVIEW]
+                    to: !php/const App\Constant\PRPlace::CODING
+                accept_code:
+                    from: !php/const App\Constant\PRPlace::REVIEW
+                    to: !php/const App\Constant\PRPlace::TEST
+                accept_test:
+                    from: !php/const App\Constant\PRPlace::TEST
+                    to: !php/const App\Constant\PRPlace::MERGED
+                reject:
+                    from: !php/const App\Constant\PRPlace::REVIEW
+                    to: !php/const App\Constant\PRPlace::CLOSED
+                reopen:
+                    from: !php/const App\Constant\PRPlace::CLOSED
+                    to: !php/const App\Constant\PRPlace::CODING
